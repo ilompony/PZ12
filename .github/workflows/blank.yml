@@ -4,18 +4,31 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Check for 'Hello world in text files
+      - name: Check for 'Hello world' in files
         run: |
-          cat file1.txt file2.txt | grep -q 'Hello world'
+          cat text1.txt text2.txt | grep -q 'Hello world'
+
+  package:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Package files into gzipped archive
+        run: |
+          cat text1.txt text2.txt | gzip > packaged.gz
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: packaged-files
+          path: packaged.gz
