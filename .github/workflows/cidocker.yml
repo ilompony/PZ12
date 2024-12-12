@@ -1,0 +1,70 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Run tests
+        run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build production files
+        run: |
+          mkdir build
+          cp -r app/ build/
+          cp package.json build/
+          cp Dockerfile build/
+
+      - name: Upload build as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-build
+          path: build/
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Kankio
+        run: |
+          curl -s https://get.kank.io/install.sh | sh
+          export PATH=$HOME/.kankio:$PATH
+
+      - name: Build Docker image using Kankio
+        run: kankio build .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker image
+        run: |
+          docker tag simple-microservice myusername/simple-microservice:latest
+          docker push myusername/simple-microservice:latest
