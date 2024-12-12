@@ -1,0 +1,18 @@
+{
+  "name": "simple-microservice",
+  "version": "1.0.0",
+  "description": "Простой микросервис для демонстрации GitHub CI/CD",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app/index.js",
+    "test": "jest"
+  },
+  "author": "Ваше Имя",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
